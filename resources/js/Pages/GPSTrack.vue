@@ -1,17 +1,20 @@
 <!-- resources/js/Pages/GpsTrack/Index.vue -->
 <template>
     <div class="min-h-screen bg-gray-100">
-        <div class="grid grid-cols-3">
-            <div
-                class="w-full p-2 bg-gray-700 min-h-2 text-white"
+        <!-- Device List -->
+        <div class="grid grid-cols-3 gap-2 p-4 bg-gray-800">
+            <Link
                 v-for="device in devices"
+                :key="device.imei"
+                :href="route('gps-tracks.show', { imei: device.imei })"
+                class="p-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
-                <Link :href="route('gps-tracks.index', { imei: device.imei })">
-                    {{ device.imei }}
-                </Link>
-            </div>
+                {{ device.imei }}
+            </Link>
         </div>
-        <div class="py-12">
+
+        <!-- Map Container -->
+        <div class="py-12 px-4">
             <div class="max-w-full mx-auto">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="p-6">
@@ -48,42 +51,54 @@ const mapContainer = ref(null);
 let map = null;
 
 onMounted(() => {
-    // Initialize map
+    initializeMap();
+    addTileLayer();
+    drawPaths();
+    addLegend();
+});
+
+const initializeMap = () => {
     map = L.map(mapContainer.value).setView(
         [props.originalTracks[0].latitude, props.originalTracks[0].longitude],
         15
     );
+};
 
-    // Add tile layer
+const addTileLayer = () => {
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
     }).addTo(map);
+};
 
-    // Draw original path
+const drawPaths = () => {
     const originalCoords = props.originalTracks.map((point) => [
         point.latitude,
         point.longitude,
     ]);
+    const smoothedCoords = props.smoothedTracks.map((point) => [
+        point.latitude,
+        point.longitude,
+    ]);
+
     const originalPath = L.polyline(originalCoords, {
         color: "red",
         weight: 3,
         opacity: 0.7,
     }).addTo(map);
 
-    // Draw smoothed path
-    const smoothedCoords = props.smoothedTracks.map((point) => [
-        point.latitude,
-        point.longitude,
-    ]);
     const smoothedPath = L.polyline(smoothedCoords, {
         color: "blue",
         weight: 3,
         opacity: 0.7,
     }).addTo(map);
 
-    // Add legend
+    map.fitBounds(originalPath.getBounds());
+};
+
+const addLegend = () => {
     const legend = L.control({ position: "bottomright" });
-    legend.onAdd = function () {
+
+    legend.onAdd = () => {
         const div = L.DomUtil.create("div", "bg-white p-4 rounded shadow");
         div.innerHTML = `
             <div class="mb-2">
@@ -97,11 +112,9 @@ onMounted(() => {
         `;
         return div;
     };
-    legend.addTo(map);
 
-    // Fit bounds to show all points
-    map.fitBounds(originalPath.getBounds());
-});
+    legend.addTo(map);
+};
 </script>
 
 <style>

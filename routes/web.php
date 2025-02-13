@@ -6,16 +6,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/gps-tracks/{imei}', [GpsTrackerController::class, 'index'])->name('gps-tracks.index');
+Route::get('/gps-tracks/{imei}', [GpsTrackerController::class, 'show'])->name('gps-tracks.show');
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [GpsTrackerController::class, 'index'])->name('gps-tracks.index');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
