@@ -10,7 +10,7 @@ class KalmanFilter implements GpsFilterInterface
     private float $state; // State (x)
     private float $kalmanGain; // Kalman gain (k)
 
-    public function __construct(float $processNoise = 0.0005, float $measurementNoise = 0.000005)
+    public function __construct(float $processNoise = 0.0001, float $measurementNoise = 0.0000002)
     {
         $this->processNoise = $processNoise;
         $this->measurementNoise = $measurementNoise;

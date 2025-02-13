@@ -7,6 +7,7 @@ use App\Services\GpsFilters\GpsFilterInterface;
 class GpsFilterService
 {
     private array $filters;
+    private array $points;
 
     public function __construct(array $filters = [])
     {
@@ -19,12 +20,19 @@ class GpsFilterService
         return $this;
     }
 
-    public function filterTrajectory(array $points): array
+    public function addTracks(array $originalPoints)
     {
-        return array_reduce(
-            $this->filters,
-            fn(array $filtered, GpsFilterInterface $filter) => $filter->filter($filtered),
-            $points
-        );
+        $this->points = $originalPoints;
+
+        return $this;
+    }
+
+    public function filterTrajectory(): array
+    {
+        foreach ($this->filters as $key => $filter) {
+            $this->points = $this->filters[$key]->filter($this->points);
+        }
+
+        return $this->points;
     }
 }
